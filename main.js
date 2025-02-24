@@ -19,15 +19,20 @@ class ProductionBuilding {
         this.costs = costs;
         this.type = 'producer';
         this.level = 0; // could be quantity/count/total/number depending on goals and/or perception
-        this.speed = 5000;
         this.baseYield = 1;
+        this.timer = {
+            duration: 5,
+            interval: 0,
+            remaining: 0,
+            tickRate: 100,
+        }
     }
 
     getProduction() {
         return this.level * this.baseYield;
     }
     getCostStr() {
-        let costStr = '';
+        let costStr = 'Cost(s) - ';
         for (let i = 0; i < this.costs.length; i++) {
             const cost = toUpperCharAtZero(this.costs[i].resource.name);
             costStr += `${cost}: ${this.costs[i].cost} `
@@ -47,69 +52,59 @@ class ProductionBuilding {
             this.costs[i].resource.count -= this.costs[i].cost;
             this.costs[i].cost += 15; // just a way to increase the cost after each purchase
         }
+        if (this.level === 0) {
+            this.produce();
+        }
         this.level++;
-        if (this.level % 5 === 0 && this.speed > 1000) {
-            this.speed -= 500;
+        if (this.level % 5 === 0 && this.timer.duration > 1) {
+            this.timer.duration -= 0.5;
         }
         updateScreen();
+    }
+    produce() {
+        const timer = this.timer;
+        const start = () => {
+            timer.remaining = timer.duration;
+            timer.interval = setInterval(tick, timer.tickRate);
+        }
+        const tick = () => {
+            timer.remaining -= 0.1;
+            if (timer.remaining <= 0) {
+                this.resource.count += this.getProduction();
+                clearInterval(timer.interval);
+                start();
+            }
+            updateScreen();
+        }
+        start();
     }
 }
 
 const forest = new ProductionBuilding('forest', wood, [{ resource: wood, cost: 0 }]);
 const mine = new ProductionBuilding('mine', stone, [{ resource: wood, cost: 0 }, { resource: stone, cost: 0 }]);
 
-
-
 function updateScreen() {
     document.querySelector('#wood').innerText = `Wood: ${wood.count}`;
     document.querySelector('#stone').innerText = `Stone: ${stone.count}`;
+
     document.querySelector('#forest').innerText = `Forest level: ${forest.level}`;
-    document.querySelector('#mine').innerText = `Mine level: ${mine.level}`;
+    document.querySelector('#forestTimer').innerText = `${formatNum(forest.timer.remaining)}s`;
     document.querySelector('#forestCost').innerText = forest.getCostStr();
+
+    document.querySelector('#mine').innerText = `Mine level: ${mine.level}`;
+    document.querySelector('#mineTimer').innerText = `${formatNum(mine.timer.remaining)}s`;
     document.querySelector('#mineCost').innerText = mine.getCostStr();
 }
 
+function formatNum(num) { // will return a string, so good for displaying on screen but can cause math bugs
+    return num.toFixed(1);
+}
+
 function toUpperCharAtZero(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1)
+    return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 updateScreen();
 window.setInterval(function() {
-    if (forest.level > 0) {
-        forest.resource.count += forest.getProduction();
-    }
-    if (mine.level > 0) {
-        mine.resource.count += mine.getProduction();
-    }
     updateScreen();
 }, 1000)
-
-
-
-
-
-// const timers = [];
-
-// function addTimer(id, duration, callback) {
-//     const timer = {
-//         id: id,
-//         diration: duration,
-//         remaining: duration,
-//         callback: callback,
-//     };
-//     timers.push(timer);
-// }
-
-// function startTimers() {
-//     const interval = 1000
-//     setInterval(() => {
-//         timers.forEach(timer => {
-//             timer.remaining -= interval;
-//             if (timer.remaining <= 0){
-//                 timer.callback();
-//                 timer.remaining = timer.duation;
-//             }
-//         });
-//     }, interval);
-// }
-
