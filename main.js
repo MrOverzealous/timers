@@ -24,17 +24,17 @@ class ProductionBuilding {
     }
 
     getProduction() {
-        return level * this.baseYield;
+        return this.level * this.baseYield;
     }
     getCostStr() {
-        let str = '';
+        let costStr = '';
         for (let i = 0; i < this.costs.length; i++) {
-            str += `${this.costs[i].resource.name}: ${this.costs[i].cost} `
+            const cost = toUpperCharAtZero(this.costs[i].resource.name);
+            costStr += `${cost}: ${this.costs[i].cost} `
         }
-        str = str.trim();
-        return str;
+        costStr = costStr.trim();
+        return costStr;
     }
-
     levelUp() {
         for (let i = 0; i < this.costs.length; i++) {
             const resCount = this.costs[i].resource.count;
@@ -51,7 +51,7 @@ class ProductionBuilding {
         if (this.level % 5 === 0 && this.speed > 1000) {
             this.speed -= 500;
         }
-        updateScreen()
+        updateScreen();
     }
 }
 
@@ -69,11 +69,17 @@ function updateScreen() {
     document.querySelector('#mineCost').innerText = mine.getCostStr();
 }
 
+function toUpperCharAtZero(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
 
 updateScreen();
 window.setInterval(function() {
     if (forest.level > 0) {
-        
+        forest.resource.count += forest.getProduction();
+    }
+    if (mine.level > 0) {
+        mine.resource.count += mine.getProduction();
     }
     updateScreen();
 }, 1000)
