@@ -1,4 +1,3 @@
-
 const wood = {
     id: '#wood',
     name: 'wood',
@@ -21,7 +20,7 @@ class ProductionBuilding {
         this.level = 0; // could be quantity/count/total/number depending on goals and/or perception
         this.baseYield = 1;
         this.timer = {
-            duration: 5,
+            duration: 1,
             interval: 0,
             remaining: 0,
             tickRate: 100,
@@ -68,12 +67,22 @@ class ProductionBuilding {
             timer.interval = setInterval(tick, timer.tickRate);
         }
         const tick = () => {
-            timer.remaining -= 0.1;
-            if (timer.remaining <= 0) {
+            if (timer.remaining - 0.1 <= 0) {
                 this.resource.count += this.getProduction();
                 clearInterval(timer.interval);
                 start();
             }
+            timer.remaining -= 0.1;
+
+            const bar = document.querySelector(`#${this.name}Progress`);
+            const progress = (timer.duration - timer.remaining) * 100 / timer.duration;
+            const formattedTime = formatNum(timer.remaining);
+            bar.value = progress;
+            // TODO migrate this down to updateScreen()
+            // ? updateMe() method? Might be an easier way to manage/compartmentalize the various screen elements
+            document.querySelector(`#${this.name}Time`).innerText = `${formattedTime}s`;
+            document.querySelector(`#${this.name}Percentage`).innerText = `${progress.toFixed(1)}%`;
+            
             updateScreen();
         }
         start();
@@ -88,11 +97,13 @@ function updateScreen() {
     document.querySelector('#stone').innerText = `Stone: ${stone.count}`;
 
     document.querySelector('#forest').innerText = `Forest level: ${forest.level}`;
-    document.querySelector('#forestTimer').innerText = `${formatNum(forest.timer.remaining)}s`;
+    document.querySelector('#forestProgress').value = (forest.timer.duration - forest.timer.remaining) * 100 / forest.timer.duration;
+    document.querySelector('#forestProgress').innerText = `${formatNum(forest.timer.remaining)}s`;
     document.querySelector('#forestCost').innerText = forest.getCostStr();
 
     document.querySelector('#mine').innerText = `Mine level: ${mine.level}`;
-    document.querySelector('#mineTimer').innerText = `${formatNum(mine.timer.remaining)}s`;
+    document.querySelector('#mineProgress').value = (mine.timer.duration - mine.timer.remaining) * 100 / mine.timer.duration;
+    document.querySelector('#mineProgress').innerText = `${formatNum(mine.timer.remaining)}s`;
     document.querySelector('#mineCost').innerText = mine.getCostStr();
 }
 

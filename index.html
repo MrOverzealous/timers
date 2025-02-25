@@ -4,6 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timers</title>
+
+    <style>
+        progress {
+            appearance: none;
+            border-radius: 1em;
+        }
+        .progressbar {
+        position: relative;
+        width: 20%;
+        }
+
+        .progressbar progress {
+            width: 100%;
+        }
+
+        .time-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .percentage-text {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+    </style>
 </head>
 <body>
     <div id="resources">
@@ -13,19 +42,25 @@
     <div id="producers">
         <div>
             <div id="forest"></div>
-            <div id="forestTimer"></div>
+            <div id="forestProgressBar" class="progressbar">
+                <progress id="forestProgress" max="100" value="0"></progress>
+                <span id="forestTime" class="time-text"></span>
+                <span id="forestPercentage" class="percentage-text"></span>
+            </div>
             <span id="forestCost"></span>
             <button onclick="forest.levelUp()">Level Up</button>
         </div>
-        <div>    
+        <div>
             <div id="mine"></div>
-            <div id="mineTimer"></div>
+            <div id="mineProgressBar" class="progressbar">
+                <progress id="mineProgress" max="100" value="0"></progress>
+                <span id="mineTime" class="time-text"></span>
+                <span id="minePercentage" class="percentage-text"></span>
+            </div>
             <span id="mineCost"></span>
             <button onclick="mine.levelUp()">Level Up</button>
         </div>
     </div>
-    
-
     <script type="text/javascript" src="main.js"></script>
 </body>
 </html>
